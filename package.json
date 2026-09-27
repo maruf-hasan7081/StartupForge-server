@@ -1,0 +1,22 @@
+{
+  "name": "startupforge-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "seed": "node src/seed.js",
+    "test:e2e": "node scripts/e2e-smoke.mjs"
+  },
+  "dependencies": {
+    "better-auth": "^1.2.8",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.16.0",
+    "stripe": "^18.0.0"
+  }
+}
