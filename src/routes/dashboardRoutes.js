@@ -28,11 +28,32 @@ router.get("/founder", requireAuth, requireRole("founder"), async (req, res) => 
       .find({ opportunity_id: { $in: oppIds } })
       .toArray();
 
+    const statusBreakdown = {
+      pending: applications.filter((a) => a.status === "pending").length,
+      accepted: applications.filter((a) => a.status === "accepted").length,
+      rejected: applications.filter((a) => a.status === "rejected").length,
+    };
+
+    const byMonth = {};
+    for (const app of applications) {
+      const key = new Date(app.applied_at).toLocaleString("en", { month: "short", year: "2-digit" });
+      byMonth[key] = (byMonth[key] || 0) + 1;
+    }
+    const applicationsTrend = Object.entries(byMonth).map(([month, count]) => ({ month, count }));
+
     res.json({
       stats: {
         opportunities: opportunities.length,
         applications: applications.length,
-        accepted: applications.filter((a) => a.status === "accepted").length,
+        accepted: statusBreakdown.accepted,
+      },
+      analytics: {
+        statusBreakdown,
+        applicationsTrend,
+        topRoles: opportunities.slice(0, 5).map((o) => ({
+          role: o.role_title,
+          applications: applications.filter((a) => a.opportunity_id === o._id.toString()).length,
+        })),
       },
     });
   } catch (error) {

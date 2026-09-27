@@ -29,6 +29,7 @@ export async function requireAuth(req, res, next) {
       skills: user.skills || "",
       bio: user.bio || "",
       isPremium: user.isPremium || false,
+      hasSelectedRole: user.hasSelectedRole === true,
     };
     next();
   } catch {

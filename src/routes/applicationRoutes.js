@@ -2,6 +2,7 @@ import { Router } from "express";
 import { ObjectId } from "mongodb";
 import { getDb } from "../config/db.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { createNotification } from "./notificationRoutes.js";
 
 const router = Router();
 
@@ -109,6 +110,15 @@ router.patch("/:id/status", requireAuth, requireRole("founder"), async (req, res
       { _id: application._id },
       { $set: { status } },
     );
+
+    const statusLabel = status === "accepted" ? "accepted" : status === "rejected" ? "rejected" : "updated";
+    await createNotification(
+      db,
+      application.applicant_email,
+      `Your application for "${application.opportunity_name}" was ${statusLabel}.`,
+      "application",
+    );
+
     res.json({ application: { ...application, status } });
   } catch {
     res.status(400).json({ message: "Invalid id" });

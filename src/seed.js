@@ -17,7 +17,16 @@ async function seed() {
         role: "admin",
       },
     });
+    await db.collection("user").updateOne(
+      { email: env.adminEmail },
+      { $set: { role: "admin", hasSelectedRole: true } },
+    );
     console.log("Admin user created");
+  } else {
+    await db.collection("user").updateOne(
+      { email: env.adminEmail },
+      { $set: { hasSelectedRole: true, role: "admin" } },
+    );
   }
 
   const startupCount = await db.collection("startups").countDocuments();

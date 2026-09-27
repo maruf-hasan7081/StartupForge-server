@@ -54,6 +54,11 @@ export function getAuth() {
           required: false,
           defaultValue: false,
         },
+        hasSelectedRole: {
+          type: "boolean",
+          required: false,
+          defaultValue: false,
+        },
       },
     },
   });

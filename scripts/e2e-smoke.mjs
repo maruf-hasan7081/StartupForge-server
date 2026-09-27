@@ -17,6 +17,13 @@ async function run() {
 
   const config = await fetch(`${API}/api/config/public`);
   checks.push(["public config", config.ok]);
+  if (config.ok) {
+    const body = await config.json();
+    checks.push(["config has googleEnabled flag", typeof body.googleEnabled === "boolean"]);
+  }
+
+  const bookmarksProtected = await fetch(`${API}/api/bookmarks/ids`);
+  checks.push(["bookmarks requires auth", bookmarksProtected.status === 401]);
 
   let failed = 0;
   for (const [name, ok] of checks) {
