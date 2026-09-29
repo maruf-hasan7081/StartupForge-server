@@ -26,16 +26,31 @@ if (mongoUri.includes("USER:PASSWORD")) {
   process.exit(1);
 }
 
+const clientUrlFromEnv = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const localDevOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
+];
+
+const isProduction = process.env.NODE_ENV === "production";
+const clientOrigins = isProduction
+  ? clientUrlFromEnv
+  : [...new Set([...clientUrlFromEnv, ...localDevOrigins])];
+
 export const env = {
   port: Number(process.env.PORT) || 5000,
   mongoUri,
   betterAuthSecret,
   betterAuthUrl: process.env.BETTER_AUTH_URL || "http://localhost:5000",
-  clientUrl: (process.env.CLIENT_URL || "http://localhost:5173").split(",")[0].trim(),
-  clientOrigins: (process.env.CLIENT_URL || "http://localhost:5173")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean),
+  clientUrl: clientUrlFromEnv[0] || "http://localhost:5173",
+  clientOrigins,
   jwtSecret,
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,

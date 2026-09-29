@@ -17,6 +17,10 @@ router.post("/", requireAuth, requireRole("collaborator"), async (req, res) => {
       return res.status(404).json({ message: "Opportunity not found" });
     }
 
+    if (opportunity.deadline && new Date(opportunity.deadline) < new Date()) {
+      return res.status(400).json({ message: "Application deadline has passed" });
+    }
+
     const existing = await db.collection("applications").findOne({
       opportunity_id: req.body.opportunity_id,
       applicant_email: req.user.email,

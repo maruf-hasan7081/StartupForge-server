@@ -48,10 +48,14 @@ router.get("/users", async (req, res) => {
 router.patch("/users/:id/block", async (req, res) => {
   try {
     const db = getDb();
+    const userId = new ObjectId(req.params.id);
     await db.collection("user").updateOne(
-      { _id: new ObjectId(req.params.id) },
+      { _id: userId },
       { $set: { isBlocked: true } },
     );
+    await db.collection("session").deleteMany({
+      $or: [{ userId: userId.toString() }, { userId }],
+    });
     res.json({ message: "User blocked" });
   } catch {
     res.status(400).json({ message: "Invalid user id" });

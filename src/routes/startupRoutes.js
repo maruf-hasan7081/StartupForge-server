@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     const db = getDb();
     const startups = await db
       .collection("startups")
-      .find({ status: { $ne: "removed" } })
+      .find({ status: "approved" })
       .sort({ createdAt: -1 })
       .limit(50)
       .toArray();
@@ -54,7 +54,7 @@ router.get("/:id", async (req, res) => {
     const db = getDb();
     const startup = await db.collection("startups").findOne({
       _id: new ObjectId(req.params.id),
-      status: { $ne: "removed" },
+      status: "approved",
     });
     if (!startup) return res.status(404).json({ message: "Startup not found" });
     res.json({ startup });
@@ -72,6 +72,10 @@ router.post("/", requireAuth, requireRole("founder"), async (req, res) => {
     });
     if (existing) {
       return res.status(400).json({ message: "You already have a startup" });
+    }
+
+    if (!req.body.logo?.trim()) {
+      return res.status(400).json({ message: "Startup logo is required (URL or uploaded image)" });
     }
 
     const doc = {
@@ -118,6 +122,18 @@ router.patch("/:id", requireAuth, requireRole("founder"), async (req, res) => {
       { _id: startup._id },
       { $set: update },
     );
+
+    const oppFields = {};
+    if (update.industry !== startup.industry) oppFields.industry = update.industry;
+    if (update.startup_name !== startup.startup_name) oppFields.startup_name = update.startup_name;
+    if (Object.keys(oppFields).length) {
+      oppFields.updatedAt = new Date();
+      await db.collection("opportunities").updateMany(
+        { startup_id: startup._id.toString(), status: { $ne: "removed" } },
+        { $set: oppFields },
+      );
+    }
+
     res.json({ startup: { ...startup, ...update } });
   } catch {
     res.status(400).json({ message: "Invalid startup id" });
