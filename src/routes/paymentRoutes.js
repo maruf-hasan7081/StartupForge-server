@@ -47,6 +47,11 @@ router.get("/success", requireAuth, async (req, res) => {
       return res.status(400).json({ message: "Payment not completed" });
     }
 
+    const sessionEmail = session.metadata?.userEmail;
+    if (!sessionEmail || sessionEmail !== req.user.email) {
+      return res.status(403).json({ message: "Payment session does not belong to this account" });
+    }
+
     const db = getDb();
     const amount = (session.amount_total || 0) / 100;
     const payment = {
