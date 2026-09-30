@@ -12,8 +12,8 @@ export async function connectDb() {
   } catch (error) {
     console.error(
       "\nCould not connect to MongoDB.\n" +
-        "- Check MONGODB_URI in server/.env (Atlas IP allowlist: 0.0.0.0/0 for dev)\n" +
-        "- Or install/start local MongoDB on port 27017\n",
+        "- Verify MONGODB_URI (Render Environment or server/.env locally)\n" +
+        "- Atlas: Network Access → allow 0.0.0.0/0 for cloud hosts like Render\n",
     );
     throw error;
   }
